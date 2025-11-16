@@ -1,0 +1,112 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\geometry{margin=2.5cm}
+
+\definecolor{codegray}{gray}{0.95}
+\lstset{
+  backgroundcolor=\color{codegray},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  language=C++,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  stringstyle=\color{red}
+}
+
+\title{Architecture et fonctionnement du mini moteur géométrique}
+\author{Projet WS3-OOP}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Ce document décrit la base de code C++ développée pour simuler un ensemble
+simple de formes géométriques. L'objectif est de démontrer l'héritage et le
+polymorphisme en programmation orientée objet, conformément au diagramme UML
+proposé. On présente ici la hiérarchie des classes, les choix d'implémentation
+et un aperçu du flux d'exécution.
+
+\section{Vue d'ensemble}
+Le code est composé d'une classe abstraite \texttt{Forme} qui définit l'API
+commune pour toutes les formes (calcul d'aire, de périmètre et représentation
+textuelle). \texttt{Polygone} dérive de \texttt{Forme} pour représenter des
+formes à côtés multiples. Les classes concrètes \texttt{Cercle},
+\texttt{Rectangle}, \texttt{Carre} et \texttt{Triangle} héritent respectivement
+de \texttt{Forme} ou \texttt{Polygone}. Les fichiers sont séparés en en-têtes
+(\texttt{include/}) et implémentations (\texttt{src/}).
+
+\section{Classe racine : Forme}
+\lstinputlisting[firstline=5,lastline=18]{../include/Forme.hpp}
+\texttt{Forme} est une classe abstraite pure contenant trois méthodes virtual
+pures. Chaque méthode est marquée \texttt{const} car elles n'altèrent pas
+l'état interne ; elles servent uniquement à interroger l'objet. \texttt{Polygone}
+réutilise la même interface, offrant un point d'ancrage pour les formes à
+plusieurs côtés (utile si l'on veut à l'avenir stocker des sommets communs).
+
+\section{Cercle}
+\lstinputlisting[firstline=5,lastline=20]{../include/Cercle.hpp}
+\lstinputlisting{../src/Cercle.cpp}
+Le cercle stocke un seul attribut, son rayon. Les méthodes \texttt{area} et
+\texttt{perimeter} s'appuient sur les formules classiques \(A = \pi r^2\) et
+\(P = 2\pi r\). La constante \texttt{kPi} est définie dans un espace de noms
+anonyme, ce qui limite sa portée au fichier.
+
+\section{Polygones concrets}
+\subsection{Rectangle}
+\lstinputlisting[firstline=5,lastline=21]{../include/Rectangle.hpp}
+\lstinputlisting{../src/Rectangle.cpp}
+\texttt{Rectangle} gère deux attributs (largeur et longueur). Il dérive de
+\texttt{Polygone} pour marquer cette forme comme un polygone. Les méthodes
+redéfinies multiplient ou additionnent ces dimensions suivant les formules
+classiques.
+
+\subsection{Carré}
+\lstinputlisting[firstline=5,lastline=18]{../include/Carre.hpp}
+\lstinputlisting{../src/Carre.cpp}
+\texttt{Carre} est une spécialisation de polygone avec un seul paramètre
+\texttt{cote}. Les méthodes utilisent les formules \(A = c^2\) et \(P = 4c\).
+
+\subsection{Triangle}
+\lstinputlisting[firstline=5,lastline=19]{../include/Triangle.hpp}
+\lstinputlisting{../src/Triangle.cpp}
+Le triangle stocke trois longueurs de côté. L'aire est calculée selon la
+formule de Héron : \(A = \sqrt{s(s-a)(s-b)(s-c)}\) avec \(s\) demi-périmètre.
+Cette approche évite de manipuler explicitement les coordonnées des sommets.
+
+\section{Programme principal}
+\lstinputlisting{../src/main.cpp}
+Le fichier \texttt{main.cpp} illustre l'utilisation de la hiérarchie. Des
+\texttt{unique	extunderscore ptr<Forme>} sont stockés dans un vecteur pour démontrer
+le polymorphisme ; l'appel à \texttt{afficherInfo} déclenche automatiquement
+la version correcte pour chaque instance.
+
+\section{Compilation}
+Un \texttt{Makefile} minimal compile la bibliothèque et l'exécutable de démo :
+\lstinputlisting{../Makefile}
+\texttt{make} produit l'exécutable \texttt{demo}, et \texttt{./demo} affiche
+les informations sur les formes créées.
+
+\section{Extensions possibles}
+\begin{itemize}
+  \item Ajouter des validations (rayon strictement positif, inégalité
+triangulaire, etc.).
+  \item Enrichir \texttt{Polygone} avec une liste de sommets pour obtenir des
+transformations géométriques.
+  \item Intégrer une interface graphique pour visualiser les formes.
+\end{itemize}
+
+\section{Conclusion}
+La structure actuelle démontre clairement l'héritage et le polymorphisme en C++.
+Chaque classe encapsule les calculs propres à sa forme, et l'interface
+\texttt{Forme} garantit une API cohérente. Le projet constitue une base solide
+pour des fonctionnalités graphiques futures ou des validations plus poussées.
+
+\end{document}
